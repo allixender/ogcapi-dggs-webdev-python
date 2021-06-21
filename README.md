@@ -39,3 +39,7 @@ collection_id: str = Path(..., alias='collectionId'),
 SyntaxError: non-default argument follows default argument
 
 ```
+
+## database notes
+
+[clickhouse initial info](./misc/database.md)

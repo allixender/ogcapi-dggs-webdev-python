@@ -15,6 +15,10 @@ To run the server, please execute the following from the root directory:
 
 ```
 pip3 install -r requirements.txt
+
+# configure clickhouse db access
+export TABLES_CONFIG=tables.template.conf
+
 python3 -m swagger_server
 ```
 
