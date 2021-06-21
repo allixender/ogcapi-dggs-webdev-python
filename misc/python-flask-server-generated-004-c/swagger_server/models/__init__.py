@@ -1,0 +1,32 @@
+# coding: utf-8
+
+# flake8: noqa
+from __future__ import absolute_import
+# import models into model package
+from swagger_server.models.collection import Collection
+from swagger_server.models.collection_list import CollectionList
+from swagger_server.models.conf_classes import ConfClasses
+from swagger_server.models.dggsjson import DGGSJSON
+from swagger_server.models.exception import Exception
+from swagger_server.models.feature_geo_json import FeatureGeoJSON
+from swagger_server.models.geometry_geo_json import GeometryGeoJSON
+from swagger_server.models.geometrycollection_geo_json import GeometrycollectionGeoJSON
+from swagger_server.models.landing_page import LandingPage
+from swagger_server.models.linestring_geo_json import LinestringGeoJSON
+from swagger_server.models.link import Link
+from swagger_server.models.multilinestring_geo_json import MultilinestringGeoJSON
+from swagger_server.models.multipoint_geo_json import MultipointGeoJSON
+from swagger_server.models.multipolygon_geo_json import MultipolygonGeoJSON
+from swagger_server.models.number_matched import NumberMatched
+from swagger_server.models.number_returned import NumberReturned
+from swagger_server.models.one_of_dggsjson_id import OneOfDGGSJSONId
+from swagger_server.models.one_offeature_geo_json_id import OneOffeatureGeoJSONId
+from swagger_server.models.one_ofgeometry_geo_json import OneOfgeometryGeoJSON
+from swagger_server.models.point_geo_json import PointGeoJSON
+from swagger_server.models.polygon_geo_json import PolygonGeoJSON
+from swagger_server.models.relative_position import RelativePosition
+from swagger_server.models.time_stamp import TimeStamp
+from swagger_server.models.zone_collection_dggsjson import ZoneCollectionDGGSJSON
+from swagger_server.models.zone_collection_geo_json import ZoneCollectionGeoJSON
+from swagger_server.models.zone_geo_json import ZoneGeoJSON
+from swagger_server.models.zone_list import ZoneList
