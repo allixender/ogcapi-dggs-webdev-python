@@ -11,6 +11,18 @@ This example uses the [Connexion](https://github.com/zalando/connexion) library 
 Python 3.5.2+
 
 ## Usage
+
+We need an env var named TABLES_CONFIG
+this TABLES_CONFIG var should hold the path to a file# based on the
+tables.template.conf wich holds the access info to the clickhouse database server
+
+```
+# for example
+export TABLES_CONFIG=$HOME/tables.conf
+
+```
+
+
 To run the server, please execute the following from the root directory:
 
 ```

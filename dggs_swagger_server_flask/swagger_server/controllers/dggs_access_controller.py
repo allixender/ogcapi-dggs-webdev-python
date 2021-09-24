@@ -7,6 +7,8 @@ from swagger_server.models.zone_collection_geo_json import ZoneCollectionGeoJSON
 from swagger_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
 from swagger_server import util
 
+from swagger_server.dataaccess.clickhouse_dao import db, dggs_access_collections_collection_id_describe_get
+
 
 def collections_collection_id_describe_get(collection_id):  # noqa: E501
     """Describes a particular DGGS
@@ -18,38 +20,10 @@ def collections_collection_id_describe_get(collection_id):  # noqa: E501
 
     :rtype: Collection
     """
-    if collection_id in ['TB16-Pix']:
-        d = {
-  "description": "A rHealPix instance based on WGS84, rotated so that all the corners of the cube lie in water",
-  "id": "TB16-Pix",
-  "links": [
-    {
-      "href": "https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf",
-      "rel": "describedBy",
-      "title": "The rHealPix DGGS specification",
-      "type": "application/PDF"
-    }
-  ],
-  "resolutions": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14
-  ],
-  "title": "Testbed 16 DGGS reference system based on rHealPix"
-}
-        return Collection(d)
+
+    rs = dggs_access_collections_collection_id_describe_get(db, collection_id)
+    if not rs is None:
+        return rs
     else:
         return DggsCollectionIdNotFoundError()
 
