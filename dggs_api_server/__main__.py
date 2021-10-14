@@ -6,14 +6,18 @@ from dggs_api_server import encoder
 
 
 def main():
-    app = connexion.App(__name__, specification_dir='./swagger/')
+    app = connexion.App(__name__, specification_dir="./swagger/")
     app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('swagger.yaml', arguments={'title': 'WIP: OGC API DGGS ZoneQuery - process style'}, pythonic_params=True)
+    app.add_api(
+        "swagger.yaml",
+        arguments={"title": "WIP: OGC API DGGS ZoneQuery - process style"},
+        pythonic_params=True,
+    )
 
     # Load configuration
-    app.config.from_envvar('TABLES_CONFIG')
+    app.config.from_envvar("TABLES_CONFIG")
     app.run(port=8080)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
