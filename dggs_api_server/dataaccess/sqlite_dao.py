@@ -9,7 +9,7 @@ import sqlite3
 
 class SqliteDB:
     def __init__(self):
-        self.conn = sqlite3.connect(f["database"])
+        self.conn = sqlite3.connect(f["database"], check_same_thread=False)
 
 
 db = SqliteDB()
@@ -29,96 +29,20 @@ def capabilities_collections_get(db: SqliteDB):
     `date_updated` DateTime
     """
     rs = db.conn.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog",
-        with_column_types=False,
-        columnar=False,
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog"
     )
     c_list = []
     for row in rs:
+        links = [row[5]] if row[5] is not None else []
         c = Collection(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
             description=row[4],
             resolutions=row[2],
-            links=list(row[5]),
+            links=links,
         )
         c_list.append(c)
-
-    d = {
-        "dggs-list": [
-            {
-                "description": "The rHealPix DGGS",
-                "id": "TB16-Pix",
-                "links": [
-                    {
-                        "href": "https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf",
-                        "rel": "describedBy",
-                        "title": "The rHealPix DGGS specification",
-                        "type": "application/PDF",
-                    },
-                    {
-                        "href": "http://data.example.org/dggs/rHealPix/zones",
-                        "rel": "zones",
-                        "type": "appplication/json",
-                    },
-                ],
-                "resolutions": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
-                "title": "The Testbed16 DGGS based on rHealPix",
-            },
-            {
-                "description": "The H3 DGGS",
-                "id": "H3",
-                "links": [
-                    {
-                        "href": "https://eng.uber.com/h3/",
-                        "rel": "describedBy",
-                        "title": "The H3 specification",
-                        "type": "text/html",
-                    },
-                    {
-                        "href": "http://data.example.org/dggs/H3/zones",
-                        "rel": "zones",
-                        "type": "appplication/json",
-                    },
-                ],
-                "resolutions": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9,
-                    10,
-                    11,
-                    12,
-                    13,
-                    14,
-                    15,
-                    16,
-                ],
-                "title": "H3",
-            },
-        ],
-        "links": [
-            {
-                "href": "http://data.example.org/dggs.json",
-                "rel": "self",
-                "title": "this document",
-                "type": "application/json",
-            },
-            {
-                "href": "http://data.example.org/dggs.html",
-                "rel": "alternate",
-                "title": "this document as HTML",
-                "type": "text/html",
-            },
-        ],
-    }
 
     links = [
         Link(
@@ -145,20 +69,19 @@ def capabilities_collections_get(db: SqliteDB):
 
 def dggs_access_collections_collection_id_describe_get(db, collection_id):
     rs = db.conn.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = {}".format(
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = '{}'".format(
             collection_id
-        ),
-        with_column_types=False,
-        columnar=False,
+        )
     )
     for row in rs:
+        links = [row[5]] if row[5] is not None else []
         c = Collection(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
             description=row[4],
             resolutions=row[2],
-            links=list(row[5]),
+            links=links,
         )
         return c
     return None
