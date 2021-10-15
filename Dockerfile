@@ -10,6 +10,8 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY . /usr/src/app
 
+RUN ls -s /usr/src/app/dggs_api_server/swagger/swagger-0.0.4.yaml /usr/src/app/dggs_api_server/swagger/swagger.yaml
+
 ENV TABLES_CONFIG /usr/src/app/tables.template.conf
 
 EXPOSE 8080
