@@ -3,3 +3,4 @@ python_dateutil == 2.6.0
 setuptools >= 21.0.0
 h3 >= 3.7
 rhealpixdggs >= 0.5.3
+flask-cors
