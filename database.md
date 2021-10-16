@@ -101,3 +101,18 @@ INSERT INTO srtm_30m_estonia_h3 ( 'cell_id','elevation','resolution','parent_ids
 INSERT INTO srtm_30m_estonia_h3 ( 'cell_id','elevation','resolution','parent_ids') VALUES ( '821137fffffffff', 38.7, 2, '');
 
 ```
+
+
+We are testing to load more substantial test data into the database, including the propoagated uncertainty as we aggregate towards coarser resolutions:
+
+```sql
+CREATE TABLE "srtm_30m_estonia_h3" (
+	"cell_id"	TEXT,
+	"elevation"	REAL NOT NULL,
+	"resolution"	INTEGER NOT NULL,
+	"parent_ids"	TEXT,
+  "elevation_count"	INTEGER,
+  "elevation_std"	REAL,
+	PRIMARY KEY("cell_id")
+);
+```

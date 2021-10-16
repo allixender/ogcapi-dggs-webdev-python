@@ -34,12 +34,14 @@ def capabilities_collections_get(db: SqliteDB):
     c_list = []
     for row in rs:
         links = [row[5]] if row[5] is not None else []
+        resolutions = row[2].split(":") if row[2] is not None else []
+
         c = Collection(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
             description=row[4],
-            resolutions=row[2],
+            resolutions=resolutions,
             links=links,
         )
         c_list.append(c)
@@ -75,12 +77,14 @@ def dggs_access_collections_collection_id_describe_get(db, collection_id):
     )
     for row in rs:
         links = [row[5]] if row[5] is not None else []
+        resolutions = row[2].split(":") if row[2] is not None else []
+
         c = Collection(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
             description=row[4],
-            resolutions=row[2],
+            resolutions=resolutions,
             links=links,
         )
         return c
