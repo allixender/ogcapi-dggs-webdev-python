@@ -40,7 +40,7 @@ info:
     url: http://www.opengeospatial.org/legal/
   version: 0.0.6
 servers:
-- url: https://virtserver.swaggerhub.com/dggs-api
+- url: https://virtserver.swaggerhub.com/dggs-api/0.0.6
   description: SwaggerHub API Auto Mocking
 tags:
 - name: Capabilities
@@ -813,7 +813,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/difference:
     get:
       tags:
@@ -966,7 +966,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/intersection:
     get:
       tags:
@@ -1119,7 +1119,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/symDifference:
     get:
       tags:
@@ -1272,7 +1272,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/union:
     get:
       tags:
@@ -1425,7 +1425,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/child:
     get:
       tags:
@@ -1573,7 +1573,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/parent:
     get:
       tags:
@@ -1721,7 +1721,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/sibling:
     get:
       tags:
@@ -1869,7 +1869,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_set_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<set>>controller
   /collections/{collectionId}/zone/{zoneId}/relativePosition:
     get:
       tags:
@@ -1940,7 +1940,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/contains:
     get:
       tags:
@@ -2013,7 +2013,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/crosses:
     get:
       tags:
@@ -2086,7 +2086,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/disjoint:
     get:
       tags:
@@ -2159,7 +2159,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/equals:
     get:
       tags:
@@ -2232,7 +2232,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/intersects:
     get:
       tags:
@@ -2305,7 +2305,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/overlaps:
     get:
       tags:
@@ -2378,7 +2378,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/touches:
     get:
       tags:
@@ -2451,7 +2451,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/within:
     get:
       tags:
@@ -2524,7 +2524,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/withinDistance:
     get:
       tags:
@@ -2604,7 +2604,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/childOf:
     get:
       tags:
@@ -2684,7 +2684,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/parentOf:
     get:
       tags:
@@ -2764,7 +2764,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/siblingOf:
     get:
       tags:
@@ -2844,7 +2844,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_query_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<query>>controller
   /collections/{collectionId}/zone/{zoneId}/relate:
     get:
       tags:
@@ -2928,7 +2928,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_reference_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<reference>>controller
   /collections/{collectionId}/zone/{zoneId}/relatePosition:
     get:
       tags:
@@ -3009,7 +3009,7 @@ paths:
             text/html:
               schema:
                 type: string
-      x-openapi-router-controller: dggs_api_server.controllers.zone_query_reference_controller
+      x-openapi-router-controller: dggs_api_server.controllers.zone_query_<<reference>>controller
 components:
   schemas:
     collection:

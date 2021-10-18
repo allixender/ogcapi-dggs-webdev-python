@@ -1,0 +1,2170 @@
+openapi: 3.0.0
+info:
+  title: "WIP: OGC API DGGS ZoneQuery - process style"
+  description: "WARNING - This is work-in-progress.\n\nThe API is an evolution of\
+    \ https://app.swaggerhub.com/apis/aaime-sh/dggs-process/0.0.3#/DGGS%20access.\n\
+    \nBasic ideas:\n* The same API elements are used for a DGGS-RS service and a DGGS-Data\
+    \ service\n* In the case of a DGGS-RS service, the collections are the DGGS instances\
+    \ themselves,\n  and the returned features have no properties other than the geometry\
+    \ and resolution\n  (e.g., in GeoJSON the properties object will be ``null``)\n\
+    * In the case of a DGGS-Data service, the collections are the sample DGGS data\
+    \ (hence, made available in a particular DGGS instance, too), and the returned\
+    \ features have\n  actual values associated in the ``properties`` object.\n\n\
+    To care for different use cases, three different output formats will be implemented\n\
+    for each endpoint returning cells:\n* A classic GeoJSON output, with geometry\
+    \ being either the boundary or the center\n  point of the zone (to be controlled\
+    \ with a request parameter), for usage in classic\n  GIS tools. The longitudes\
+    \ ill eventually be extended outside of the -180,180\n  range to allow visualization\
+    \ by tools that cannot deal properly with dateline crossing.\n* A DGGSJSON output,\
+    \ small variation of the classic GeoJSON where the geometry is\n  replaced by\
+    \ an array of zone-ids, to be used in both zone oriented and feature oriented\n\
+    \  API (e.g., the)\n* A plain array of DGGS zone ids, for cases where the attributes\
+    \ are not needed and data transfer compactness is paramount.\n\nQuestions, discussion\
+    \ topics:\n* Support for multiple DDGSs, we are using rHealPix and H3, to offer\
+    \ the\n  clients and DGGS data server at least a DGGS they are not already supporting\
+    \ natively\n* Is the API going to be sufficiently self describing that the clients\n\
+    \  can figure out everything it needs by just walking the API, or will it need\
+    \ specific knowledge contained in an API profile (e.g, a profile for rHeadlPix,\
+    \ one for H3, cosider for example zoneId and how to determine them)\n* For parametric\
+    \ DDGSs (e.g., rHealPix) do we expose a specific instance as its own DGGS, or\
+    \ somehow expose the full parameters of the DGGS in each resource?\n* This API\
+    \ follows a process API, where most resources are a process and one needs to know\
+    \ valid values to hit them\n\n\nCHANGES\n* 2020-07-02 initial version\n* 2020-07-23\
+    \ usage of zones instead of cells everywhere, extending to support also data DGGS\
+    \ servers.\n* 2021-06-15 addition of definitions for ZoneQuery operations"
+  contact:
+    name: Robert Gibb
+    email: gibbr@landcareresearch.co.nz
+  license:
+    name: OGC License
+    url: http://www.opengeospatial.org/legal/
+  version: 0.0.4
+servers:
+- url: https://virtserver.swaggerhub.com/dggs-api
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: Capabilities
+  description: essential characteristics of this API
+paths:
+  /:
+    get:
+      tags:
+      - Capabilities
+      summary: landing page
+      description: "The landing page provides links to the API definition, the conformance\n\
+        statements and to other resources provided by the API."
+      operationId: root_get
+      responses:
+        "200":
+          description: "The landing page provides links to the API definition\n(link\
+            \ relations `service-desc` and `service-doc`),\nthe Conformance declaration\
+            \ (path `/conformance`,\nlink relation `conformance`), and the Feature\n\
+            Collections (path `/collections`, link relation\n`data`)."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/landingPage'
+              example:
+                title: Buildings in Bonn
+                description: Access to data about buildings in the city of Bonn via
+                  a Web API that conforms to the OGC API Features specification.
+                links:
+                - href: http://data.example.org/
+                  rel: self
+                  type: application/json
+                  title: this document
+                - href: http://data.example.org/api
+                  rel: service-desc
+                  type: application/vnd.oai.openapi+json;version=3.0
+                  title: the API definition
+                - href: http://data.example.org/api.html
+                  rel: service-doc
+                  type: text/html
+                  title: the API documentation
+                - href: http://data.example.org/conformance
+                  rel: conformance
+                  type: application/json
+                  title: OGC API conformance classes implemented by this server
+                - href: http://data.example.org/collections
+                  rel: data
+                  type: application/json
+                  title: Information about the feature collections
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.capabilities_controller
+  /conformance:
+    get:
+      tags:
+      - Capabilities
+      summary: information about specifications that this API conforms to (we may
+        not need one)
+      description: |-
+        A list of all conformance classes specified in a standard that the
+        server conforms to.
+      operationId: conformance_get
+      responses:
+        "200":
+          description: "The URIs of all conformance classes supported by the server.\n\
+            \nTo support \"generic\" clients that want to access multiple\nOGC API\
+            \ Features implementations - and not \"just\" a specific\nAPI / server,\
+            \ the server declares the conformance\nclasses it implements and conforms\
+            \ to."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/confClasses'
+              example:
+                conformsTo:
+                - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core
+                - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/oas30
+                - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/html
+                - http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.capabilities_controller
+  /collections:
+    get:
+      tags:
+      - Capabilities
+      summary: the list of supported collections
+      operationId: collections_get
+      responses:
+        "200":
+          description: "The list of DGGS available and link to the processes\n\nThe\
+            \ response contains the list of DGGS objects.\nThis information includes:\n\
+            \n* A local identifier for the DGGS that is unique for this API;\n* An\
+            \ optional human readable title and description for the DGGS;\n* The predominant\
+            \ zone shape (rectangular, triangular, hexagonal)\n* The list of resolutions\
+            \ for the particular DGGS"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collection-list'
+              example:
+                links:
+                - href: http://data.example.org/dggs.json
+                  rel: self
+                  type: application/json
+                  title: this document
+                - href: http://data.example.org/dggs.html
+                  rel: alternate
+                  type: text/html
+                  title: this document as HTML
+                dggs-list:
+                - id: TB16-Pix
+                  title: The Testbed16 DGGS based on rHealPix
+                  description: The rHealPix DGGS
+                  resolutions:
+                  - 0
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+                  - 5
+                  - 6
+                  - 7
+                  - 8
+                  - 9
+                  - 10
+                  - 11
+                  - 12
+                  - 13
+                  - 14
+                  links:
+                  - href: https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf
+                    rel: describedBy
+                    type: application/PDF
+                    title: The rHealPix DGGS specification
+                  - href: http://data.example.org/dggs/rHealPix/zones
+                    rel: zones
+                    type: appplication/json
+                - id: H3
+                  title: H3
+                  description: The H3 DGGS
+                  resolutions:
+                  - 0
+                  - 1
+                  - 2
+                  - 3
+                  - 4
+                  - 5
+                  - 6
+                  - 7
+                  - 8
+                  - 9
+                  - 10
+                  - 11
+                  - 12
+                  - 13
+                  - 14
+                  - 15
+                  - 16
+                  links:
+                  - href: https://eng.uber.com/h3/
+                    rel: describedBy
+                    type: text/html
+                    title: The H3 specification
+                  - href: http://data.example.org/dggs/H3/zones
+                    rel: zones
+                    type: appplication/json
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.capabilities_controller
+  /collections/{collectionId}/describe:
+    get:
+      tags:
+      - DGGS access
+      summary: Describes a particular DGGS
+      operationId: collections_collection_id_describe_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: "Describes a particular DGGS\n\nThis information includes:\n\
+            \n* A local identifier for the DGGS that is unique for this API;\n* An\
+            \ optional human readable title and description for the DGGS;\n* The predominant\
+            \ zone shape (rectangular, triangular, hexagonal)\n* The list of resolutions\
+            \ for the particular DGGS"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/collection'
+              example:
+                id: TB16-Pix
+                title: Testbed 16 DGGS reference system based on rHealPix
+                description: "A rHealPix instance based on WGS84, rotated so that\
+                  \ all the corners of the cube lie in water"
+                resolutions:
+                - 0
+                - 1
+                - 2
+                - 3
+                - 4
+                - 5
+                - 6
+                - 7
+                - 8
+                - 9
+                - 10
+                - 11
+                - 12
+                - 13
+                - 14
+                links:
+                - href: https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf
+                  rel: describedBy
+                  type: application/PDF
+                  title: The rHealPix DGGS specification
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zones:
+    get:
+      tags:
+      - DGGS access
+      summary: "Access the list of zones in a given DGGS. Can list either all the\
+        \ zones, or a particular subset based on resolution, WGS84 bbox, or list of\
+        \ containing zones (e.g., polygon defined in DGGS terms)"
+      operationId: collections_collection_id_zones_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: resolution
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+      - name: bbox
+        in: query
+        description: "Only features that have a geometry that intersects the bounding\
+          \ box are selected.\nThe bounding box is provided as four or six numbers,\
+          \ depending on whether the\ncoordinate reference system includes a vertical\
+          \ axis (height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower\
+          \ left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n\
+          * Upper right corner, coordinate axis 1\n* Upper right corner, coordinate\
+          \ axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nThe coordinate\
+          \ reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84)\
+          \ unless a different coordinate\nreference system is specified in the parameter\
+          \ `bbox-crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases\
+          \ the sequence of\nminimum longitude, minimum latitude, maximum longitude\
+          \ and maximum latitude.\nHowever, in cases where the box spans the antimeridian\
+          \ the first value\n(west-most box edge) is larger than the third value (east-most\
+          \ box edge).\n\nIf the vertical axis is included, the third and the sixth\
+          \ number are\nthe bottom and the top of the 3-dimensional bounding box.\n\
+          \nIf a feature has multiple spatial geometry properties, it is the decision\
+          \ of the\nserver whether only a single spatial geometry property is used\
+          \ to determine\nthe extent or all relevant geometries."
+        required: false
+        style: form
+        explode: false
+        schema:
+          maxItems: 6
+          minItems: 4
+          type: array
+          items:
+            type: number
+      - name: zoneIdList
+        in: query
+        description: Comma separated list of zone identifiers
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: limit
+        in: query
+        description: |-
+          The optional limit parameter limits the number of items that are presented in the response document.
+
+          Only items are counted that are on the first level of the collection in the response document.
+          Nested objects contained within the explicitly requested items shall not be counted.
+
+          Minimum = 1. Maximum = 10000. Default = 10.
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 10000
+          minimum: 1
+          type: integer
+          default: 10
+      responses:
+        "200":
+          description: "A list of DGGS zones.\n\nThe response contains a list of DGGS\
+            \ zones. The response can be a GeoJSON payload with full boundaries, for\
+            \ traditional clients, or\na simple list of zone ids, for DGGS aware clients"
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionGeoJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+                - type: Feature
+                  id: Q4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+            application/dggs+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionDGGSJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                  - P4
+                - type: Feature
+                  id: Q4
+                  geometry:
+                  - Q4
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+                - type: Feature
+                  id: myFeature.1
+                  geometry:
+                  - Q4
+                  - P4
+                  - P32
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+            application/zoneids+json:
+              schema:
+                $ref: '#/components/schemas/zoneList'
+              example:
+              - zones:
+                - O
+                - P
+                - Q
+                - R
+                links:
+                - href: "http://data.example.org/dggs/rHeadPix/zones?bbox=-20,-40,20,40&startIndex=1000"
+                  rel: next
+                  type: application/json
+                  title: the next page of
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone:
+    get:
+      tags:
+      - DGGS access
+      summary: Access the definition of a particular zone
+      operationId: collections_collection_id_zone_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |-
+            A single DGGS zone
+
+            The response contains the description of a single DGGS zone
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/zoneGeoJSON'
+              example:
+                type: Feature
+                id: P4
+                geometry:
+                  type: Polygon
+                  coordinates:
+                  - '...'
+                resolution: 0
+                properties:
+                  att1: value1
+                  att2: value2
+            application/dggs+json:
+              schema:
+                $ref: '#/components/schemas/DGGSJSON'
+              example:
+                type: Feature
+                id: P4
+                geometry:
+                - P4
+                properties:
+                  att1: value1
+                  att2: value2
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/buffer:
+    get:
+      tags:
+      - DGGS access
+      summary: Get the list of zones children of a given zone (should it return just
+        a list of identifiers instead of a GeoJSON collection?)
+      operationId: collections_collection_id_zone_zone_id_buffer_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: distance
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: number
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: "A list of DGGS zones.\n\nThe response contains a list of DGGS\
+            \ zones. The response can be a GeoJSON payload with full boundaries, for\
+            \ traditional clients, or\na simple list of zone ids, for DGGS aware clients"
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionGeoJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+                - type: Feature
+                  id: Q4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+            application/dggs+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionDGGSJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                  - P4
+                - type: Feature
+                  id: Q4
+                  geometry:
+                  - Q4
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+                - type: Feature
+                  id: myFeature.1
+                  geometry:
+                  - Q4
+                  - P4
+                  - P32
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+            application/zoneids+json:
+              schema:
+                $ref: '#/components/schemas/zoneList'
+              example:
+              - zones:
+                - O
+                - P
+                - Q
+                - R
+                links:
+                - href: "http://data.example.org/dggs/rHeadPix/zones?bbox=-20,-40,20,40&startIndex=1000"
+                  rel: next
+                  type: application/json
+                  title: the next page of
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/child:
+    get:
+      tags:
+      - DGGS access
+      summary: Get the list of zones children of a given zone (should it return just
+        a list of identifiers instead of a GeoJSON collection?)
+      operationId: collections_collection_id_zone_zone_id_child_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: inheritId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: levels
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: "A list of DGGS zones.\n\nThe response contains a list of DGGS\
+            \ zones. The response can be a GeoJSON payload with full boundaries, for\
+            \ traditional clients, or\na simple list of zone ids, for DGGS aware clients"
+          content:
+            application/geo+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionGeoJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+                - type: Feature
+                  id: Q4
+                  geometry:
+                    type: Polygon
+                    coordinates:
+                    - '...'
+                  properties:
+                    resolution: 0
+                    center:
+                      type: Point
+                      coordinates:
+                      - 0
+                      - 0
+            application/dggs+json:
+              schema:
+                $ref: '#/components/schemas/zoneCollectionDGGSJSON'
+              example:
+              - type: FeatureCollection
+                features:
+                - type: Feature
+                  id: P4
+                  geometry:
+                  - P4
+                - type: Feature
+                  id: Q4
+                  geometry:
+                  - Q4
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+                - type: Feature
+                  id: myFeature.1
+                  geometry:
+                  - Q4
+                  - P4
+                  - P32
+                  properties:
+                    myAttribute: 3
+                    otherAttribute: abc
+            application/zoneids+json:
+              schema:
+                $ref: '#/components/schemas/zoneList'
+              example:
+              - zones:
+                - O
+                - P
+                - Q
+                - R
+                links:
+                - href: "http://data.example.org/dggs/rHeadPix/zones?bbox=-20,-40,20,40&startIndex=1000"
+                  rel: next
+                  type: application/json
+                  title: the next page of
+            text/html:
+              schema:
+                type: string
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/childOf:
+    get:
+      tags:
+      - DGGS access
+      summary: Determine if the another ZonalID is a childOf the input ZonaID
+      operationId: collections_collection_id_zone_zone_id_child_of_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: zonalId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Q3
+      - name: inheritId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: A single boolean type response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                x-content-type: application/json
+              example:
+                result: true
+            text/html:
+              schema:
+                type: boolean
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/parentOf:
+    get:
+      tags:
+      - DGGS access
+      summary: Determine if the another ZonalID is a parentOf the input ZonaID
+      operationId: collections_collection_id_zone_zone_id_parent_of_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: zonalId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Q3
+      - name: inheritId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: A single boolean type response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                x-content-type: application/json
+              example:
+                result: true
+            text/html:
+              schema:
+                type: boolean
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/siblingOf:
+    get:
+      tags:
+      - DGGS access
+      summary: Determine if the another ZonalID is a siblingOf the input ZonaID
+      operationId: collections_collection_id_zone_zone_id_sibling_of_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: zonalId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Q3
+      - name: inheritId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: A single boolean type response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                x-content-type: application/json
+              example:
+                result: true
+            text/html:
+              schema:
+                type: boolean
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/intersects:
+    get:
+      tags:
+      - DGGS access
+      summary: Determine if the another ZonalID intersects with the ZonaID
+      operationId: collections_collection_id_zone_zone_id_intersects_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: zonalId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Q3
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: A single boolean type response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                x-content-type: application/json
+              example:
+                result: true
+            text/html:
+              schema:
+                type: boolean
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+  /collections/{collectionId}/zone/{zoneId}/overlaps:
+    get:
+      tags:
+      - DGGS access
+      summary: Determine if the another ZonalID overlaps with the ZonaID
+      operationId: collections_collection_id_zone_zone_id_overlaps_get
+      parameters:
+      - name: collectionId
+        in: path
+        description: local identifier of a collection
+        required: true
+        schema:
+          type: string
+      - name: zoneId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: Q3
+      - name: zonalId
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+          example: Q3
+      - name: projectTo
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maxItems: 4
+          minItems: 4
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: A single boolean type response
+          content:
+            application/json:
+              schema:
+                type: boolean
+                x-content-type: application/json
+              example:
+                result: true
+            text/html:
+              schema:
+                type: boolean
+        "406":
+          description: None of the requested media types is supported at the path.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: A server error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+      x-openapi-router-controller: dggs_api_server.controllers.dggs_access_controller
+components:
+  schemas:
+    collection:
+      required:
+      - id
+      - links
+      type: object
+      properties:
+        id:
+          type: string
+          description: "identifier of the the collection. In case it's a DGGS RS service,\
+            \ it will be the DGGS instance identifier, otherwise, it's going to be\
+            \ the data collection id."
+          example: TB16-Pix
+        dggs-id:
+          type: string
+          description: "identifiers of the DGGS instance. For DGGS RS services, it\
+            \ will be the same as the id, for DGGS Data services, it identifiers the\
+            \ particular DGGS instance used."
+          example: TB16-Pix
+        title:
+          type: string
+          description: human readable title of the collection
+          example: Testbed 16 DGGS reference system based on rHealPix
+        description:
+          type: string
+          description: a description of the collection
+          example: Some description of the DGGS here
+        resolutions:
+          type: array
+          items:
+            type: number
+        links:
+          type: array
+          description: "The list of links, e.g., to the operations provided by this\
+            \ DGGS collection."
+          example:
+          - href: http://data.example.com/buildings
+            rel: item
+          - href: http://example.com/concepts/buildings.html
+            rel: describedBy
+            type: text/html
+          items:
+            $ref: '#/components/schemas/link'
+      example:
+        description: Some description of the DGGS here
+        resolutions:
+        - 0.80082819046101150206595775671303272247314453125
+        - 0.80082819046101150206595775671303272247314453125
+        links:
+        - href: http://data.example.com/buildings
+          rel: item
+        - href: http://example.com/concepts/buildings.html
+          rel: describedBy
+          type: text/html
+        id: TB16-Pix
+        dggs-id: TB16-Pix
+        title: Testbed 16 DGGS reference system based on rHealPix
+    collection-list:
+      required:
+      - dggs-list
+      - links
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        dggs-list:
+          type: array
+          items:
+            type: string
+      example:
+        links:
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        dggs-list:
+        - dggs-list
+        - dggs-list
+    zoneGeoJSON:
+      allOf:
+      - $ref: '#/components/schemas/featureGeoJSON'
+      - required:
+        - resolution
+        type: object
+        properties:
+          resolution:
+            type: number
+    DGGSJSON:
+      required:
+      - geometry
+      - id
+      - properties
+      - type
+      type: object
+      properties:
+        id:
+          oneOf:
+          - type: string
+          - type: integer
+        type:
+          type: string
+          enum:
+          - Feature
+        geometry:
+          type: array
+          description: "The geometry of the feature, as a list of DGGS zone ids"
+          items:
+            type: string
+        properties:
+          type: object
+          nullable: true
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+    zoneCollectionGeoJSON:
+      required:
+      - features
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/zoneGeoJSON'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        timeStamp:
+          $ref: '#/components/schemas/timeStamp'
+        numberMatched:
+          $ref: '#/components/schemas/numberMatched'
+        numberReturned:
+          $ref: '#/components/schemas/numberReturned'
+      example:
+        timeStamp: 2017-08-17T08:05:32Z
+        features:
+        - ""
+        - ""
+        numberReturned: 10
+        links:
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        type: FeatureCollection
+        numberMatched: 127
+    zoneCollectionDGGSJSON:
+      required:
+      - features
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - FeatureCollection
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/DGGSJSON'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        timeStamp:
+          $ref: '#/components/schemas/timeStamp'
+        numberMatched:
+          $ref: '#/components/schemas/numberMatched'
+        numberReturned:
+          $ref: '#/components/schemas/numberReturned'
+    zoneList:
+      required:
+      - links
+      - zones
+      type: object
+      properties:
+        zones:
+          type: array
+          items:
+            type: string
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        timeStamp:
+          $ref: '#/components/schemas/timeStamp'
+        numberMatched:
+          $ref: '#/components/schemas/numberMatched'
+        numberReturned:
+          $ref: '#/components/schemas/numberReturned'
+    link:
+      required:
+      - href
+      type: object
+      properties:
+        href:
+          type: string
+          example: http://data.example.com/buildings/123
+        rel:
+          type: string
+          example: alternate
+        type:
+          type: string
+          example: application/geo+json
+        hreflang:
+          type: string
+          example: en
+        title:
+          type: string
+          example: "Trierer Strasse 70, 53115 Bonn"
+        length:
+          type: integer
+      example:
+        hreflang: en
+        rel: alternate
+        length: 0
+        href: http://data.example.com/buildings/123
+        type: application/geo+json
+        title: "Trierer Strasse 70, 53115 Bonn"
+    timeStamp:
+      type: string
+      description: This property indicates the time and date when the response was
+        generated.
+      format: date-time
+      example: 2017-08-17T08:05:32Z
+    numberMatched:
+      minimum: 0
+      type: integer
+      description: |-
+        The number of features of the feature type that match the selection
+        parameters like `bbox`.
+      example: 127
+    numberReturned:
+      minimum: 0
+      type: integer
+      description: "The number of features in the feature collection.\n\nA server\
+        \ may omit this information in a response, if the information\nabout the number\
+        \ of features is not known or difficult to compute.\n\nIf the value is provided,\
+        \ the value shall be identical to the number\nof items in the \"features\"\
+        \ array."
+      example: 10
+    RelativePosition:
+      uniqueItems: true
+      type: array
+      description: a RelativePosition enumeration as defined in W3C/OGC 16-071r3 as
+        one of
+      items:
+        type: string
+        enum:
+        - Before
+        - After
+        - Meets
+        - MetBy
+        - Overlaps
+        - OverlappedBy
+        - Starts
+        - StartedBy
+        - During
+        - Contains
+        - Finishes
+        - FinishedBy
+        - Equals
+        - In
+        - Disjoint
+    landingPage:
+      required:
+      - links
+      type: object
+      properties:
+        title:
+          type: string
+          example: Buildings in Bonn
+        description:
+          type: string
+          example: Access to data about buildings in the city of Bonn via a Web API
+            that conforms to the OGC API Features specification.
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+      example:
+        description: Access to data about buildings in the city of Bonn via a Web
+          API that conforms to the OGC API Features specification.
+        links:
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        - hreflang: en
+          rel: alternate
+          length: 0
+          href: http://data.example.com/buildings/123
+          type: application/geo+json
+          title: "Trierer Strasse 70, 53115 Bonn"
+        title: Buildings in Bonn
+    exception:
+      required:
+      - code
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+      description: "Information about the exception: an error code plus an optional\
+        \ description."
+    confClasses:
+      required:
+      - conformsTo
+      type: object
+      properties:
+        conformsTo:
+          type: array
+          items:
+            type: string
+      example:
+        conformsTo:
+        - conformsTo
+        - conformsTo
+    featureGeoJSON:
+      required:
+      - geometry
+      - properties
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Feature
+        geometry:
+          $ref: '#/components/schemas/geometryGeoJSON'
+        properties:
+          type: object
+          nullable: true
+        id:
+          oneOf:
+          - type: string
+          - type: integer
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+    geometryGeoJSON:
+      oneOf:
+      - $ref: '#/components/schemas/pointGeoJSON'
+      - $ref: '#/components/schemas/multipointGeoJSON'
+      - $ref: '#/components/schemas/linestringGeoJSON'
+      - $ref: '#/components/schemas/multilinestringGeoJSON'
+      - $ref: '#/components/schemas/polygonGeoJSON'
+      - $ref: '#/components/schemas/multipolygonGeoJSON'
+      - $ref: '#/components/schemas/geometrycollectionGeoJSON'
+    pointGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Point
+        coordinates:
+          minItems: 2
+          type: array
+          items:
+            type: number
+    multipointGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - MultiPoint
+        coordinates:
+          type: array
+          items:
+            minItems: 2
+            type: array
+            items:
+              type: number
+    linestringGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - LineString
+        coordinates:
+          minItems: 2
+          type: array
+          items:
+            minItems: 2
+            type: array
+            items:
+              type: number
+    multilinestringGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - MultiLineString
+        coordinates:
+          type: array
+          items:
+            minItems: 2
+            type: array
+            items:
+              minItems: 2
+              type: array
+              items:
+                type: number
+    polygonGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - Polygon
+        coordinates:
+          type: array
+          items:
+            minItems: 4
+            type: array
+            items:
+              minItems: 2
+              type: array
+              items:
+                type: number
+    multipolygonGeoJSON:
+      required:
+      - coordinates
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              minItems: 4
+              type: array
+              items:
+                minItems: 2
+                type: array
+                items:
+                  type: number
+    geometrycollectionGeoJSON:
+      required:
+      - geometries
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - GeometryCollection
+        geometries:
+          type: array
+          items:
+            $ref: '#/components/schemas/geometryGeoJSON'
+  responses:
+    NotSupported:
+      description: None of the requested media types is supported at the path.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
+        text/html:
+          schema:
+            type: string
+    DGGSDescription:
+      description: "Describes a particular DGGS\n\nThis information includes:\n\n\
+        * A local identifier for the DGGS that is unique for this API;\n* An optional\
+        \ human readable title and description for the DGGS;\n* The predominant zone\
+        \ shape (rectangular, triangular, hexagonal)\n* The list of resolutions for\
+        \ the particular DGGS"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/collection'
+          example:
+            id: TB16-Pix
+            title: Testbed 16 DGGS reference system based on rHealPix
+            description: "A rHealPix instance based on WGS84, rotated so that all\
+              \ the corners of the cube lie in water"
+            resolutions:
+            - 0
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 7
+            - 8
+            - 9
+            - 10
+            - 11
+            - 12
+            - 13
+            - 14
+            links:
+            - href: https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf
+              rel: describedBy
+              type: application/PDF
+              title: The rHealPix DGGS specification
+        text/html:
+          schema:
+            type: string
+    DGGSList:
+      description: "The list of DGGS available and link to the processes\n\nThe response\
+        \ contains the list of DGGS objects.\nThis information includes:\n\n* A local\
+        \ identifier for the DGGS that is unique for this API;\n* An optional human\
+        \ readable title and description for the DGGS;\n* The predominant zone shape\
+        \ (rectangular, triangular, hexagonal)\n* The list of resolutions for the\
+        \ particular DGGS"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/collection-list'
+          example:
+            links:
+            - href: http://data.example.org/dggs.json
+              rel: self
+              type: application/json
+              title: this document
+            - href: http://data.example.org/dggs.html
+              rel: alternate
+              type: text/html
+              title: this document as HTML
+            dggs-list:
+            - id: TB16-Pix
+              title: The Testbed16 DGGS based on rHealPix
+              description: The rHealPix DGGS
+              resolutions:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+              - 6
+              - 7
+              - 8
+              - 9
+              - 10
+              - 11
+              - 12
+              - 13
+              - 14
+              links:
+              - href: https://iopscience.iop.org/article/10.1088/1755-1315/34/1/012012/pdf
+                rel: describedBy
+                type: application/PDF
+                title: The rHealPix DGGS specification
+              - href: http://data.example.org/dggs/rHealPix/zones
+                rel: zones
+                type: appplication/json
+            - id: H3
+              title: H3
+              description: The H3 DGGS
+              resolutions:
+              - 0
+              - 1
+              - 2
+              - 3
+              - 4
+              - 5
+              - 6
+              - 7
+              - 8
+              - 9
+              - 10
+              - 11
+              - 12
+              - 13
+              - 14
+              - 15
+              - 16
+              links:
+              - href: https://eng.uber.com/h3/
+                rel: describedBy
+                type: text/html
+                title: The H3 specification
+              - href: http://data.example.org/dggs/H3/zones
+                rel: zones
+                type: appplication/json
+        text/html:
+          schema:
+            type: string
+    ZoneList:
+      description: "A list of DGGS zones.\n\nThe response contains a list of DGGS\
+        \ zones. The response can be a GeoJSON payload with full boundaries, for traditional\
+        \ clients, or\na simple list of zone ids, for DGGS aware clients"
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/zoneCollectionGeoJSON'
+          example:
+          - type: FeatureCollection
+            features:
+            - type: Feature
+              id: P4
+              geometry:
+                type: Polygon
+                coordinates:
+                - '...'
+              properties:
+                resolution: 0
+                center:
+                  type: Point
+                  coordinates:
+                  - 0
+                  - 0
+            - type: Feature
+              id: Q4
+              geometry:
+                type: Polygon
+                coordinates:
+                - '...'
+              properties:
+                resolution: 0
+                center:
+                  type: Point
+                  coordinates:
+                  - 0
+                  - 0
+        application/dggs+json:
+          schema:
+            $ref: '#/components/schemas/zoneCollectionDGGSJSON'
+          example:
+          - type: FeatureCollection
+            features:
+            - type: Feature
+              id: P4
+              geometry:
+              - P4
+            - type: Feature
+              id: Q4
+              geometry:
+              - Q4
+              properties:
+                myAttribute: 3
+                otherAttribute: abc
+            - type: Feature
+              id: myFeature.1
+              geometry:
+              - Q4
+              - P4
+              - P32
+              properties:
+                myAttribute: 3
+                otherAttribute: abc
+        application/zoneids+json:
+          schema:
+            $ref: '#/components/schemas/zoneList'
+          example:
+          - zones:
+            - O
+            - P
+            - Q
+            - R
+            links:
+            - href: "http://data.example.org/dggs/rHeadPix/zones?bbox=-20,-40,20,40&startIndex=1000"
+              rel: next
+              type: application/json
+              title: the next page of
+        text/html:
+          schema:
+            type: string
+    Zone:
+      description: |-
+        A single DGGS zone
+
+        The response contains the description of a single DGGS zone
+      content:
+        application/geo+json:
+          schema:
+            $ref: '#/components/schemas/zoneGeoJSON'
+          example:
+            type: Feature
+            id: P4
+            geometry:
+              type: Polygon
+              coordinates:
+              - '...'
+            resolution: 0
+            properties:
+              att1: value1
+              att2: value2
+        application/dggs+json:
+          schema:
+            $ref: '#/components/schemas/DGGSJSON'
+          example:
+            type: Feature
+            id: P4
+            geometry:
+            - P4
+            properties:
+              att1: value1
+              att2: value2
+        text/html:
+          schema:
+            type: string
+    BooleanResponse:
+      description: A single boolean type response
+      content:
+        application/json:
+          schema:
+            type: boolean
+            x-content-type: application/json
+          example:
+            result: true
+        text/html:
+          schema:
+            type: boolean
+  parameters:
+    zoneId:
+      name: zoneId
+      in: path
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+        example: Q3
+    bbox:
+      name: bbox
+      in: query
+      description: "Only features that have a geometry that intersects the bounding\
+        \ box are selected.\nThe bounding box is provided as four or six numbers,\
+        \ depending on whether the\ncoordinate reference system includes a vertical\
+        \ axis (height or depth):\n\n* Lower left corner, coordinate axis 1\n* Lower\
+        \ left corner, coordinate axis 2\n* Minimum value, coordinate axis 3 (optional)\n\
+        * Upper right corner, coordinate axis 1\n* Upper right corner, coordinate\
+        \ axis 2\n* Maximum value, coordinate axis 3 (optional)\n\nThe coordinate\
+        \ reference system of the values is WGS 84 longitude/latitude\n(http://www.opengis.net/def/crs/OGC/1.3/CRS84)\
+        \ unless a different coordinate\nreference system is specified in the parameter\
+        \ `bbox-crs`.\n\nFor WGS 84 longitude/latitude the values are in most cases\
+        \ the sequence of\nminimum longitude, minimum latitude, maximum longitude\
+        \ and maximum latitude.\nHowever, in cases where the box spans the antimeridian\
+        \ the first value\n(west-most box edge) is larger than the third value (east-most\
+        \ box edge).\n\nIf the vertical axis is included, the third and the sixth\
+        \ number are\nthe bottom and the top of the 3-dimensional bounding box.\n\n\
+        If a feature has multiple spatial geometry properties, it is the decision\
+        \ of the\nserver whether only a single spatial geometry property is used to\
+        \ determine\nthe extent or all relevant geometries."
+      required: false
+      style: form
+      explode: false
+      schema:
+        maxItems: 6
+        minItems: 4
+        type: array
+        items:
+          type: number
+    limit:
+      name: limit
+      in: query
+      description: |-
+        The optional limit parameter limits the number of items that are presented in the response document.
+
+        Only items are counted that are on the first level of the collection in the response document.
+        Nested objects contained within the explicitly requested items shall not be counted.
+
+        Minimum = 1. Maximum = 10000. Default = 10.
+      required: false
+      style: form
+      explode: true
+      schema:
+        maximum: 10000
+        minimum: 1
+        type: integer
+        default: 10
+    resolution:
+      name: resolution
+      in: query
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: number
+    zoneIdList:
+      name: zoneIdList
+      in: query
+      description: Comma separated list of zone identifiers
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+    another:
+      name: zonalId
+      in: query
+      required: true
+      style: form
+      explode: true
+      schema:
+        type: string
+        example: Q3
+    dist:
+      name: dist
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        maxItems: 2
+        minItems: 1
+        type: array
+        items:
+          type: string
+    inheritId:
+      name: inheritId
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: boolean
+    levels:
+      name: levels
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    distance:
+      name: distance
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: number
+    matrix:
+      name: matrix
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        maxItems: 9
+        minItems: 9
+        type: array
+        items:
+          type: string
+    projectTo:
+      name: projectTo
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        maxItems: 4
+        minItems: 4
+        type: array
+        items:
+          type: string
+    rangeRefine:
+      name: rangeRefine
+      in: query
+      required: false
+      style: form
+      explode: false
+      schema:
+        maxItems: 2
+        minItems: 2
+        type: array
+        items:
+          type: integer
+    relate:
+      name: relate
+      in: query
+      required: false
+      style: form
+      explode: true
+      schema:
+        $ref: '#/components/schemas/RelativePosition'

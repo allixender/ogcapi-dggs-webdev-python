@@ -13,7 +13,7 @@ def main():
     app = connexion.App(__name__, specification_dir=specification_dir)
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api(
-        "swagger-0.0.4.yaml",
+        "swagger-0.0.6.yaml",
         arguments={"title": "WIP: OGC API DGGS ZoneQuery - process style"},
         pythonic_params=True,
     )

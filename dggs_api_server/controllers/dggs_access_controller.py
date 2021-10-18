@@ -51,179 +51,16 @@ def collections_collection_id_zone_get(collection_id):  # noqa: E501
     :rtype: ZoneGeoJSON
     """
     if collection_id in ["TB16-Pix"]:
-        d = {}
+        d = {
+            "geometry": ["P4"],
+            "id": "P4",
+            "properties": {"att1": "value1", "att2": "value2"},
+            "type": "Feature",
+        }
         return ZoneGeoJSON(d)
         # return 'do some magic!'
     else:
         return DggsCollectionIdNotFoundError()
-
-
-def collections_collection_id_zone_zone_id_buffer_get(
-    collection_id, zone_id, distance=None, project_to=None
-):  # noqa: E501
-    """Get the list of zones children of a given zone (should it return just a list of identifiers instead of a GeoJSON collection?)
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param distance:
-    :type distance: float
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: ZoneCollectionGeoJSON
-    """
-    if collection_id in ["TB16-Pix"]:
-        d = {}
-        return ZoneCollectionGeoJSON(d)
-        # return 'do some magic!'
-    else:
-        return DggsCollectionIdNotFoundError()
-
-
-def collections_collection_id_zone_zone_id_child_get(
-    collection_id, zone_id, inherit_id=None, levels=None
-):  # noqa: E501
-    """Get the list of zones children of a given zone (should it return just a list of identifiers instead of a GeoJSON collection?)
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param inherit_id:
-    :type inherit_id: bool
-    :param levels:
-    :type levels: int
-
-    :rtype: ZoneCollectionGeoJSON
-    """
-    if collection_id in ["TB16-Pix"]:
-        d = {}
-        return ZoneCollectionGeoJSON(d)
-        # return 'do some magic!'
-    else:
-        return DggsCollectionIdNotFoundError()
-
-
-def collections_collection_id_zone_zone_id_child_of_get(
-    collection_id, zone_id, zonal_id, inherit_id=None, project_to=None
-):  # noqa: E501
-    """Determine if the another ZonalID is a childOf the input ZonaID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param inherit_id:
-    :type inherit_id: bool
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: bool
-    """
-    if collection_id in ["TB16-Pix"]:
-        d = {}
-        return True
-        # return 'do some magic!'
-    else:
-        return DggsCollectionIdNotFoundError()
-
-
-def collections_collection_id_zone_zone_id_intersects_get(
-    collection_id, zone_id, zonal_id, project_to=None
-):  # noqa: E501
-    """Determine if the another ZonalID intersects with the ZonaID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: bool
-    """
-    return "do some magic!"
-
-
-def collections_collection_id_zone_zone_id_overlaps_get(
-    collection_id, zone_id, zonal_id, project_to=None
-):  # noqa: E501
-    """Determine if the another ZonalID overlaps with the ZonaID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: bool
-    """
-    return "do some magic!"
-
-
-def collections_collection_id_zone_zone_id_parent_of_get(
-    collection_id, zone_id, zonal_id, inherit_id=None, project_to=None
-):  # noqa: E501
-    """Determine if the another ZonalID is a parentOf the input ZonaID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param inherit_id:
-    :type inherit_id: bool
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: bool
-    """
-    return "do some magic!"
-
-
-def collections_collection_id_zone_zone_id_sibling_of_get(
-    collection_id, zone_id, zonal_id, inherit_id=None, project_to=None
-):  # noqa: E501
-    """Determine if the another ZonalID is a siblingOf the input ZonaID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param inherit_id:
-    :type inherit_id: bool
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: bool
-    """
-    return "do some magic!"
 
 
 def collections_collection_id_zones_get(
@@ -246,25 +83,25 @@ def collections_collection_id_zones_get(
 
     :rtype: ZoneCollectionGeoJSON
     """
-    return "do some magic!"
 
-
-def collections_collection_id_zone_zone_id_distance_get(
-    collection_id, zone_id, zonal_id, project_to=None
-):  # noqa: E501
-    """Test if the current ZoneId is withinDistance another ZonalID
-
-     # noqa: E501
-
-    :param collection_id: local identifier of a collection
-    :type collection_id: str
-    :param zone_id:
-    :type zone_id: str
-    :param zonal_id:
-    :type zonal_id: str
-    :param project_to:
-    :type project_to: List[str]
-
-    :rtype: Distance
-    """
-    return "do some magic!"
+    results = [
+        {
+            "features": [
+                {"geometry": ["P4"], "id": "P4", "type": "Feature"},
+                {
+                    "geometry": ["Q4"],
+                    "id": "Q4",
+                    "properties": {"myAttribute": 3, "otherAttribute": "abc"},
+                    "type": "Feature",
+                },
+                {
+                    "geometry": ["Q4", "P4", "P32"],
+                    "id": "myFeature.1",
+                    "properties": {"myAttribute": 3, "otherAttribute": "abc"},
+                    "type": "Feature",
+                },
+            ],
+            "type": "FeatureCollection",
+        }
+    ]
+    return ZoneCollectionGeoJSON(results)
