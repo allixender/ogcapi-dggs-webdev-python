@@ -16,6 +16,8 @@ from dggs_api_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
 
 import sqlite3
 
+from dggs_api_server.dataaccess import dggs_transform
+
 
 class SqliteDB:
     def __init__(self):
@@ -137,12 +139,58 @@ def dggs_access_collections_collection_id_zone_get(db, collection_id):
 def dggs_access_collections_collection_id_zones_get(
     db, collection_id, resolution, bbox=None, zone_id_list=None, limit=None
 ):
+    dggs_info = dggs_access_collections_collection_id_describe_get(db, collection_id)
+    if dggs_info is None:
+        return None
+
     limit_val = 100 if limit is None else limit
     limit_str = "LIMIT {}".format(limit_val)
 
+    zone_selection_list = []
+    has_parents = False
+
+    if not zone_id_list is None and isinstance(zone_id_list, list):
+        target_zone_id_list = []
+        if len(zone_id_list) > 100:
+            # reduce via parents
+            print(zone_id_list)
+            has_parents = True
+        else:
+            target_zone_id_list = zone_id_list
+        zone_selection_list = zone_selection_list + target_zone_id_list
+
+    if not bbox is None:
+        minx, miny, maxx, maxy = bbox
+        area_json = {
+            "type": "Polygon",
+            "coordinates": [
+                [[miny, minx], [miny, maxx], [maxy, maxx], [maxy, minx], [miny, minx]]
+            ],
+        }
+        zone_id_list_from_fill = dggs_transform.fill_area(
+            dggs_info.dggs_id, area_json, resolution
+        )
+        target_zone_id_list = []
+        if len(zone_id_list_from_fill) > 100:
+            # reduce via parents
+            print(zone_id_list_from_fill)
+            has_parents = True
+        else:
+            target_zone_id_list = zone_id_list_from_fill
+        zone_selection_list = zone_selection_list + target_zone_id_list
+
+    zone_clause = ""
+    if len(zone_selection_list) > 0:
+        zone_clause = ",".join(f"'{zone_selection_list}'")
+
+        if has_parents:
+            zone_clause = f" AND parent_ids IN ( {zone_clause} )"
+        else:
+            zone_clause = f" AND cell_ids IN ( {zone_clause} )"
+
     rs = db.conn.execute(
-        "SELECT * FROM {} where resolution = {} {}".format(
-            collection_id, resolution, limit_str
+        "SELECT * FROM {} where resolution = {} {} {}".format(
+            collection_id, resolution, zone_clause, limit_str
         )
     )
 
