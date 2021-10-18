@@ -2,6 +2,11 @@
 
 http://docs.opengeospatial.org/per/20-039r2.html#_the_clickhouse_storage_choice
 
+*Remark: The Clickhouse DAO is not as fully implemented as the sqlite3 demo case!*
+
+Required tables:
+
+
 ## dggs_catalog
 
 not sure if needed, depends on metadata and layer management, potentially configure in a YAML file

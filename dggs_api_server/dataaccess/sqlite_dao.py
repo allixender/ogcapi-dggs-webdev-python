@@ -4,6 +4,16 @@ from dggs_api_server.models.collection_list import CollectionList
 from dggs_api_server.models.collection import Collection
 from dggs_api_server.models.link import Link  # noqa: F401,E501
 
+from dggs_api_server.models.collection import Collection  # noqa: E501
+from dggs_api_server.models.exception import (
+    DggsException,
+    DggsCollectionIdNotFoundError,
+)  # noqa: E501
+from dggs_api_server.models.zone_collection_geo_json import (
+    ZoneCollectionGeoJSON,
+)  # noqa: E501
+from dggs_api_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
+
 import sqlite3
 
 
@@ -89,3 +99,59 @@ def dggs_access_collections_collection_id_describe_get(db, collection_id):
         )
         return c
     return None
+
+
+def build_dggs_json_feature(
+    names, row, ftype="Feature", cell_id_name="cell_id", ignore_fields=["parent_ids"]
+):
+    data = dict(zip(names, row))
+
+    d = {
+        "geometry": [data[cell_id_name]],
+        "id": data[cell_id_name],
+        "properties": {},
+        "type": ftype,
+    }
+    [
+        d["properties"].update({k: v})
+        for (k, v) in data.items()
+        if k not in [cell_id_name] + ignore_fields
+    ]
+    return d
+
+
+def dggs_access_collections_collection_id_zone_get(db, collection_id):
+    rs = db.conn.execute("SELECT * FROM {} limit 1".format(collection_id))
+    names = [description[0] for description in rs.description]
+
+    that_row = rs.fetchone()
+    if not that_row is None:
+
+        d = build_dggs_json_feature(names, that_row)
+
+        return ZoneGeoJSON(d)
+    else:
+        return None
+
+
+def dggs_access_collections_collection_id_zones_get(
+    db, collection_id, resolution, bbox=None, zone_id_list=None, limit=None
+):
+    limit_val = 100 if limit is None else limit
+    limit_str = "LIMIT {}".format(limit_val)
+
+    rs = db.conn.execute(
+        "SELECT * FROM {} where resolution = {} {}".format(
+            collection_id, resolution, limit_str
+        )
+    )
+
+    names = [description[0] for description in rs.description]
+
+    results = []
+
+    for row in rs:
+        d = build_dggs_json_feature(names, row)
+        results.append(ZoneGeoJSON(d))
+
+    return ZoneCollectionGeoJSON(type="FeatureCollection", features=results)

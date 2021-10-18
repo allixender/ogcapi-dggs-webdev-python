@@ -26,3 +26,15 @@ def capabilities_collections_get():
 
 def dggs_access_collections_collection_id_describe_get(collection_id):
     return dbdao.dggs_access_collections_collection_id_describe_get(db, collection_id)
+
+
+def dggs_access_collections_collection_id_zone_get(collection_id):
+    return dbdao.dggs_access_collections_collection_id_zone_get(db, collection_id)
+
+
+def dggs_access_collections_collection_id_zones_get(
+    collection_id, resolution, bbox=None, zone_id_list=None, limit=None
+):
+    return dbdao.dggs_access_collections_collection_id_zones_get(
+        db, collection_id, resolution, bbox=None, zone_id_list=None, limit=None
+    )

@@ -50,15 +50,11 @@ def collections_collection_id_zone_get(collection_id):  # noqa: E501
 
     :rtype: ZoneGeoJSON
     """
-    if collection_id in ["TB16-Pix"]:
-        d = {
-            "geometry": ["P4"],
-            "id": "P4",
-            "properties": {"att1": "value1", "att2": "value2"},
-            "type": "Feature",
-        }
-        return ZoneGeoJSON(d)
-        # return 'do some magic!'
+
+    rs = dao.dggs_access_collections_collection_id_zone_get(collection_id)
+
+    if not rs is None:
+        return rs
     else:
         return DggsCollectionIdNotFoundError()
 
@@ -84,24 +80,10 @@ def collections_collection_id_zones_get(
     :rtype: ZoneCollectionGeoJSON
     """
 
-    results = [
-        {
-            "features": [
-                {"geometry": ["P4"], "id": "P4", "type": "Feature"},
-                {
-                    "geometry": ["Q4"],
-                    "id": "Q4",
-                    "properties": {"myAttribute": 3, "otherAttribute": "abc"},
-                    "type": "Feature",
-                },
-                {
-                    "geometry": ["Q4", "P4", "P32"],
-                    "id": "myFeature.1",
-                    "properties": {"myAttribute": 3, "otherAttribute": "abc"},
-                    "type": "Feature",
-                },
-            ],
-            "type": "FeatureCollection",
-        }
-    ]
-    return ZoneCollectionGeoJSON(results)
+    rs = dao.dggs_access_collections_collection_id_zones_get(
+        collection_id, resolution, bbox=None, zone_id_list=None, limit=None
+    )
+    if not rs is None:
+        return rs
+    else:
+        return DggsCollectionIdNotFoundError()
