@@ -81,7 +81,7 @@ def collections_collection_id_zones_get(
     """
 
     rs = dao.dggs_access_collections_collection_id_zones_get(
-        collection_id, resolution, bbox=None, zone_id_list=None, limit=None
+        collection_id, resolution, bbox=bbox, zone_id_list=zone_id_list, limit=limit
     )
     if not rs is None:
         return rs

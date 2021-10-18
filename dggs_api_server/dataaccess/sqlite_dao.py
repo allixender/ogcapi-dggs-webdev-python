@@ -14,9 +14,11 @@ from dggs_api_server.models.zone_collection_geo_json import (
 )  # noqa: E501
 from dggs_api_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
 
+from dggs_api_server.dataaccess import dggs_transform
+
 import sqlite3
 
-from dggs_api_server.dataaccess import dggs_transform
+from flask import current_app, logging
 
 
 class SqliteDB:
@@ -25,6 +27,8 @@ class SqliteDB:
 
 
 db = SqliteDB()
+db_where_clause_limit = 100
+service_feature_limit = 5000
 
 
 def capabilities_collections_get(db: SqliteDB):
@@ -139,27 +143,32 @@ def dggs_access_collections_collection_id_zone_get(db, collection_id):
 def dggs_access_collections_collection_id_zones_get(
     db, collection_id, resolution, bbox=None, zone_id_list=None, limit=None
 ):
+    params = f"c {collection_id}, r {resolution}, b {bbox}, z {zone_id_list}, l {limit}"
+    current_app.logger.info(params)
+
     dggs_info = dggs_access_collections_collection_id_describe_get(db, collection_id)
     if dggs_info is None:
         return None
 
-    limit_val = 100 if limit is None else limit
-    limit_str = "LIMIT {}".format(limit_val)
+    dggs_type = dggs_info.dggs_id
 
     zone_selection_list = []
     has_parents = False
 
-    if not zone_id_list is None and isinstance(zone_id_list, list):
+    if zone_id_list is not None and isinstance(zone_id_list, list):
         target_zone_id_list = []
-        if len(zone_id_list) > 100:
+        if len(zone_id_list) > db_where_clause_limit:
             # reduce via parents
-            print(zone_id_list)
+            parent_ids = dggs_transform.get_parents_max_list(
+                dggs_type, zone_id_list, db_where_clause_limit
+            )
+            target_zone_id_list = list(parent_ids)
             has_parents = True
         else:
             target_zone_id_list = zone_id_list
         zone_selection_list = zone_selection_list + target_zone_id_list
 
-    if not bbox is None:
+    if bbox is not None:
         minx, miny, maxx, maxy = bbox
         area_json = {
             "type": "Polygon",
@@ -168,31 +177,45 @@ def dggs_access_collections_collection_id_zones_get(
             ],
         }
         zone_id_list_from_fill = dggs_transform.fill_area(
-            dggs_info.dggs_id, area_json, resolution
+            dggs_type, area_json, resolution
         )
         target_zone_id_list = []
-        if len(zone_id_list_from_fill) > 100:
+        if len(zone_id_list_from_fill) > db_where_clause_limit:
             # reduce via parents
-            print(zone_id_list_from_fill)
+            parent_ids = dggs_transform.get_parents_max_list(
+                dggs_type, zone_id_list_from_fill, db_where_clause_limit
+            )
+            target_zone_id_list = list(parent_ids)
             has_parents = True
         else:
-            target_zone_id_list = zone_id_list_from_fill
+            target_zone_id_list = list(zone_id_list_from_fill)
         zone_selection_list = zone_selection_list + target_zone_id_list
 
     zone_clause = ""
     if len(zone_selection_list) > 0:
-        zone_clause = ",".join(f"'{zone_selection_list}'")
 
+        # (parent_ids like '%8511346ffffffff%' or parent_ids like '%85113473fffffff%');
         if has_parents:
-            zone_clause = f" AND parent_ids IN ( {zone_clause} )"
+            zones_str = [f"parent_ids like '%{zone}%'" for zone in zone_selection_list]
+            zone_clause = " or ".join(zones_str)
+            zone_clause = f" AND ( {zone_clause} )"
         else:
-            zone_clause = f" AND cell_ids IN ( {zone_clause} )"
+            zones_str = [f"'{zone}'" for zone in zone_selection_list]
+            zone_clause = ",".join(zones_str)
+            zone_clause = f" AND cell_id IN ( {zone_clause} )"
 
-    rs = db.conn.execute(
-        "SELECT * FROM {} where resolution = {} {} {}".format(
-            collection_id, resolution, zone_clause, limit_str
-        )
+    limit_val = service_feature_limit if limit is None else limit
+    if limit is not None and limit > service_feature_limit:
+        limit_val = service_feature_limit
+
+    limit_str = "LIMIT {}".format(int(limit_val))
+
+    sql = "SELECT * FROM {} where resolution = {} {} {}".format(
+        collection_id, int(resolution), zone_clause, limit_str
     )
+    current_app.logger.info(sql)
+
+    rs = db.conn.execute(sql)
 
     names = [description[0] for description in rs.description]
 
