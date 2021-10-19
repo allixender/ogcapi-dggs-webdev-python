@@ -1,0 +1,3 @@
+rhealpixdggs >= 0.5.3
+rhealpix-sf
+# https://github.com/surroundaustralia/rhealpix-geo

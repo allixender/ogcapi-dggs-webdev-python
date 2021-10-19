@@ -1,20 +1,18 @@
 from dggs_api_server import config_fields as f
 
-from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.collection import Collection
-from dggs_api_server.models.link import Link  # noqa: F401,E501
-
-import sqlite3
-
 db = None
 
-if f["driver"] == "clickhouse_driver":
-    import dggs_api_server.dataaccess.clickhouse_dao as dbdao
-    from dggs_api_server.dataaccess.clickhouse_dao import db
-
-elif f["driver"] == "sqlite3":
+if f["driver"] == "sqlite3":
     import dggs_api_server.dataaccess.sqlite_dao as dbdao
     from dggs_api_server.dataaccess.sqlite_dao import db
+
+elif f["driver"] == "psycopg2":
+    import dggs_api_server.dataaccess.postgres_dao as dbdao
+    from dggs_api_server.dataaccess.postgres_dao import db
+
+elif f["driver"] == "clickhouse_driver":
+    import dggs_api_server.dataaccess.clickhouse_dao as dbdao
+    from dggs_api_server.dataaccess.clickhouse_dao import db
 
 else:
     raise ImportError("no suitable db dao configured")

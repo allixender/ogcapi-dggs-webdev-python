@@ -13,6 +13,7 @@ from dggs_api_server.models.zone_collection_geo_json import (
     ZoneCollectionGeoJSON,
 )  # noqa: E501
 from dggs_api_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
+from dggs_api_server.models.dggsjson import DGGSJSON  # noqa: E501
 
 from dggs_api_server.dataaccess import dggs_transform
 
@@ -44,7 +45,8 @@ def capabilities_collections_get(db: SqliteDB):
     `date_loaded` DateTime,
     `date_updated` DateTime
     """
-    rs = db.conn.execute(
+    cursor = db.conn.cursor()
+    rs = cursor.execute(
         "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog"
     )
     c_list = []
@@ -135,7 +137,16 @@ def dggs_access_collections_collection_id_zone_get(db, collection_id):
 
         d = build_dggs_json_feature(names, that_row)
 
-        return ZoneGeoJSON(d)
+        # if media_type_request == "application/geo+json":
+        #     return ZoneGeoJSON(type="Feature", geometry=dggs_transform.to_geojson(d['geometry']), properties=d['properties'], id=d['id'], links=[], resolution=dggs_transform.get_resolution(d['id'])))
+
+        return DGGSJSON(
+            type="Feature",
+            geometry=d["geometry"],
+            id=d["id"],
+            properties=d["properties"],
+            links=[],
+        )
     else:
         return None
 
@@ -223,6 +234,13 @@ def dggs_access_collections_collection_id_zones_get(
 
     for row in rs:
         d = build_dggs_json_feature(names, row)
-        results.append(ZoneGeoJSON(d))
+        dz = DGGSJSON(
+            type="Feature",
+            geometry=d["geometry"],
+            id=d["id"],
+            properties=d["properties"],
+            links=[],
+        )
+        results.append(dz)
 
     return ZoneCollectionGeoJSON(type="FeatureCollection", features=results)
