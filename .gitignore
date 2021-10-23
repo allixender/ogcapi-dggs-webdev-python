@@ -63,4 +63,7 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
+# .bak
+*.bak
+
 tables.conf
