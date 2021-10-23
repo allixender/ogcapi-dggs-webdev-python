@@ -7,6 +7,7 @@ COPY requirements.txt /usr/src/app/
 
 RUN pip install --no-cache-dir connexion[swagger-ui]
 RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements-rhealpix.txt
 # RUN pip3 install --no-cache-dir -r requirements-clickhouse.txt
 
 COPY . /usr/src/app
