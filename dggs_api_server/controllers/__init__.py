@@ -35,3 +35,21 @@
 /collections/{collectionId}/zone/{zoneId}/relate [get]: dggs_api_server.controllers.zone_query_reference_controller
 /collections/{collectionId}/zone/{zoneId}/relatePosition [get]: dggs_api_server.controllers.zone_query_reference_controller
 """
+
+
+from typing import List
+from flask import request
+from dggs_api_server import get_base_url
+
+
+def canonical_url_for_path(host=None, path=None):
+    base_url = get_base_url() if host is None else host
+    if base_url.endswith("/"):
+        base_url = base_url[:-1]
+
+    if path is None:
+        return base_url
+    elif path.startswith("/"):
+        return base_url + path
+    else:
+        return base_url + "/" + path

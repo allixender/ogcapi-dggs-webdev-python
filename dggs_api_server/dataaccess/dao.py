@@ -18,16 +18,18 @@ else:
     raise ImportError("no suitable db dao configured")
 
 
-def capabilities_collections_get():
-    return dbdao.capabilities_collections_get(db)
+def catalog_get():
+    return dbdao.catalog_get(db)
 
 
-def dggs_access_collections_collection_id_describe_get(collection_id):
-    return dbdao.dggs_access_collections_collection_id_describe_get(db, collection_id)
+def catalog_describe_id_get(collection_id):
+    return dbdao.catalog_describe_id_get(db, collection_id)
 
 
-def dggs_access_collections_collection_id_zone_get(collection_id):
-    return dbdao.dggs_access_collections_collection_id_zone_get(db, collection_id)
+def dggs_access_collections_collection_id_zone_get(collection_id, zone_id):
+    return dbdao.dggs_access_collections_collection_id_zone_get(
+        db, collection_id, zone_id
+    )
 
 
 def dggs_access_collections_collection_id_zones_get(

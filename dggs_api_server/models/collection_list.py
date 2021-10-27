@@ -7,6 +7,7 @@ from typing import List, Dict  # noqa: F401
 
 from dggs_api_server.models.base_model_ import Model
 from dggs_api_server.models.link import Link  # noqa: F401,E501
+from dggs_api_server.models.collections import Collections  # noqa: F401,E501
 from dggs_api_server import util
 
 
@@ -15,28 +16,25 @@ class CollectionList(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, links: List[Link]=None, dggs_list: List[str]=None):  # noqa: E501
+
+    def __init__(
+        self, links: List[Link] = None, collections: List[Collections] = None
+    ):  # noqa: E501
         """CollectionList - a model defined in Swagger
 
         :param links: The links of this CollectionList.  # noqa: E501
         :type links: List[Link]
-        :param dggs_list: The dggs_list of this CollectionList.  # noqa: E501
-        :type dggs_list: List[str]
+        :param collections: The Collections of this CollectionList.  # noqa: E501
+        :type collections: List[Collections]
         """
-        self.swagger_types = {
-            'links': List[Link],
-            'dggs_list': List[str]
-        }
+        self.swagger_types = {"links": List[Link], "collections": List[Collections]}
 
-        self.attribute_map = {
-            'links': 'links',
-            'dggs_list': 'dggs-list'
-        }
+        self.attribute_map = {"links": "links", "collections": "collections"}
         self._links = links
-        self._dggs_list = dggs_list
+        self._collections = collections
 
     @classmethod
-    def from_dict(cls, dikt) -> 'CollectionList':
+    def from_dict(cls, dikt) -> "CollectionList":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -65,29 +63,33 @@ class CollectionList(Model):
         :type links: List[Link]
         """
         if links is None:
-            raise ValueError("Invalid value for `links`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `links`, must not be `None`"
+            )  # noqa: E501
 
         self._links = links
 
     @property
-    def dggs_list(self) -> List[str]:
-        """Gets the dggs_list of this CollectionList.
+    def collections(self) -> List[Collections]:
+        """Gets the Collections of this CollectionList.
 
 
-        :return: The dggs_list of this CollectionList.
-        :rtype: List[str]
+        :return: The Collections of this CollectionList.
+        :rtype: List[Collections]
         """
-        return self._dggs_list
+        return self._collections
 
-    @dggs_list.setter
-    def dggs_list(self, dggs_list: List[str]):
-        """Sets the dggs_list of this CollectionList.
+    @collections.setter
+    def collections(self, collections: List[Collections]):
+        """Sets the collections of this CollectionList.
 
 
-        :param dggs_list: The dggs_list of this CollectionList.
-        :type dggs_list: List[str]
+        :param Collections: The collections of this CollectionList.
+        :type collections: List[Collections]
         """
-        if dggs_list is None:
-            raise ValueError("Invalid value for `dggs_list`, must not be `None`")  # noqa: E501
+        if collections is None:
+            raise ValueError(
+                "Invalid value for `collections`, must not be `None`"
+            )  # noqa: E501
 
-        self._dggs_list = dggs_list
+        self._collections = collections

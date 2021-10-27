@@ -1,7 +1,7 @@
 from dggs_api_server import config_fields as f
 
 from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.collection import Collection
+from dggs_api_server.models.catalog_entry import CatalogEntry  # noqa: E501
 from dggs_api_server.models.link import Link  # noqa: F401,E501
 
 from flask import current_app, logging
@@ -25,7 +25,7 @@ class ClickhouseDB:
 db = ClickhouseDB()
 
 
-def capabilities_collections_get(db: ClickhouseDB):
+def catalog_get(db: ClickhouseDB):
     """
     0 `table_name` String,
     1 `dggs_type` String,
@@ -45,7 +45,7 @@ def capabilities_collections_get(db: ClickhouseDB):
     )
     c_list = []
     for row in rs:
-        c = Collection(
+        c = CatalogEntry(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
@@ -78,7 +78,7 @@ def capabilities_collections_get(db: ClickhouseDB):
     return cl
 
 
-def dggs_access_collections_collection_id_describe_get(db, collection_id):
+def catalog_describe_id_get(db, collection_id):
     rs = db.ch_client.execute(
         "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = {}".format(
             collection_id
@@ -87,7 +87,7 @@ def dggs_access_collections_collection_id_describe_get(db, collection_id):
         columnar=False,
     )
     for row in rs:
-        c = Collection(
+        c = CatalogEntry(
             id=row[0],
             dggs_id=row[1],
             title=row[0],

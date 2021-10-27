@@ -8,7 +8,9 @@ is an example of building a swagger-enabled Flask server.
 
 This example uses the [Connexion](https://github.com/zalando/connexion) library on top of Flask.
 
-The OpenAPI target definition is of [DGGS API 0.0.6 of the DGGS SWG](https://app.swaggerhub.com/apis/geofizzydrink/wip-ogc_api_dggs_zone_query_process_style/0.0.6)
+The OpenAPI target definition is of DGGS API 0.0.6 of the DGGS SWG [wip-ogc_api_dggs_zone_query_process_style](https://app.swaggerhub.com/apis/geofizzydrink/wip-ogc_api_dggs_zone_query_process_style/0.0.6)
+
+The latest iteration of that spec is actually [ogc_api_dggs, unfortunately also 0.0.6](https://app.swaggerhub.com/apis/geofizzydrink/ogc_api_dggs/0.0.6). This repo is not yet implementing this. As part of the [October 2021 ogcapi-code-sprint](https://github.com/opengeospatial/ogcapi-code-sprint-2021-10/issues/1) I/we are aiming to support the new API SPEC. Stay tuned or pull request.
 
 ## Requirements
 Python 3.5.2+
@@ -17,7 +19,9 @@ Python 3.5.2+
 
 We need an env var named TABLES_CONFIG
 this TABLES_CONFIG var should hold the path to a file# based on the
-tables.template.conf wich holds the access info to the clickhouse database server
+tables.template.conf wich holds the access info to the database definition.
+
+The most useful is the demo test.sb SQlite database.
 
 ```
 # for example

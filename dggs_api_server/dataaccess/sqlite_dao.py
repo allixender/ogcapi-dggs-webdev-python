@@ -1,10 +1,8 @@
 from dggs_api_server import config_fields as f
 
 from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.collection import Collection
 from dggs_api_server.models.link import Link  # noqa: F401,E501
 
-from dggs_api_server.models.collection import Collection  # noqa: E501
 from dggs_api_server.models.exception import (
     DggsException,
     DggsCollectionIdNotFoundError,
@@ -32,7 +30,7 @@ db_where_clause_limit = 100
 service_feature_limit = 5000
 
 
-def capabilities_collections_get(db: SqliteDB):
+def catalog_get(db: SqliteDB):
     """
     0 `table_name` String,
     1 `dggs_type` String,
@@ -47,64 +45,57 @@ def capabilities_collections_get(db: SqliteDB):
     """
     cursor = db.conn.cursor()
     rs = cursor.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog"
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url, extent, date_loaded FROM dggs_catalog"
     )
     c_list = []
-    for row in rs:
-        links = [row[5]] if row[5] is not None else []
-        resolutions = row[2].split(":") if row[2] is not None else []
+    field_names = [description[0] for description in rs.description]
 
-        c = Collection(
-            id=row[0],
-            dggs_id=row[1],
-            title=row[0],
-            description=row[4],
-            resolutions=resolutions,
-            links=links,
-        )
+    for row in rs:
+        tx = zip(field_names, row)
+        c = dict(tx)
+
+        links = [c["meta_url"]] if c["meta_url"] is not None else []
+        resolutions = [
+            int(x) for x in c["resolutions"].split(":") if c["resolutions"] is not None
+        ]
+        variables = c["variables"].split(":") if c["variables"] is not None else []
+        extent = [float(x) for x in c["extent"].split(",") if c["extent"] is not None]
+
+        c.update({"variables": variables})
+        c.update({"extent": extent})
+        c.update({"resolutions": resolutions})
+        c.update({"links": links})
+
+        print(str(c))
         c_list.append(c)
 
-    links = [
-        Link(
-            {
-                "href": "http://data.example.org/dggs.json",
-                "rel": "self",
-                "title": "this document",
-                "type": "application/json",
-            }
-        ),
-        Link(
-            {
-                "href": "http://data.example.org/dggs.html",
-                "rel": "alternate",
-                "title": "this document as HTML",
-                "type": "text/html",
-            }
-        ),
-    ]
-
-    cl = CollectionList(links=links, dggs_list=c_list)
-    return cl
+    return c_list
 
 
-def dggs_access_collections_collection_id_describe_get(db, collection_id):
+def catalog_describe_id_get(db, collection_id):
     rs = db.conn.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = '{}'".format(
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url, extent, date_loaded FROM dggs_catalog where table_name = '{}'".format(
             collection_id
         )
     )
+    field_names = [description[0] for description in rs.description]
     for row in rs:
-        links = [row[5]] if row[5] is not None else []
-        resolutions = row[2].split(":") if row[2] is not None else []
+        tx = zip(field_names, row)
+        c = dict(tx)
 
-        c = Collection(
-            id=row[0],
-            dggs_id=row[1],
-            title=row[0],
-            description=row[4],
-            resolutions=resolutions,
-            links=links,
-        )
+        links = [c["meta_url"]] if c["meta_url"] is not None else []
+        resolutions = [
+            int(x) for x in c["resolutions"].split(":") if c["resolutions"] is not None
+        ]
+        variables = c["variables"].split(":") if c["variables"] is not None else []
+        extent = [float(x) for x in c["extent"].split(",") if c["extent"] is not None]
+
+        c.update({"variables": variables})
+        c.update({"extent": extent})
+        c.update({"resolutions": resolutions})
+        c.update({"links": links})
+
+        print(str(c))
         return c
     return None
 
@@ -128,8 +119,10 @@ def build_dggs_json_feature(
     return d
 
 
-def dggs_access_collections_collection_id_zone_get(db, collection_id):
-    rs = db.conn.execute("SELECT * FROM {} limit 1".format(collection_id))
+def dggs_access_collections_collection_id_zone_get(db, collection_id, zone_id):
+    rs = db.conn.execute(
+        "SELECT * FROM {} where cell_id = '{}' limit 1".format(collection_id, zone_id)
+    )
     names = [description[0] for description in rs.description]
 
     that_row = rs.fetchone()

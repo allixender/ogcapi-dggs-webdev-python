@@ -1,7 +1,7 @@
 from dggs_api_server import config_fields as f
 
 from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.collection import Collection
+from dggs_api_server.models.catalog_entry import CatalogEntry  # noqa: E501
 from dggs_api_server.models.link import Link  # noqa: F401,E501
 
 from flask import current_app, logging
@@ -21,7 +21,7 @@ class PostgresDB:
 db = PostgresDB()
 
 
-def capabilities_collections_get(db: PostgresDB):
+def catalog_get(db: PostgresDB):
     """
     0 `table_name` String,
     1 `dggs_type` String,
@@ -42,7 +42,7 @@ def capabilities_collections_get(db: PostgresDB):
         links = [row[5]] if row[5] is not None else []
         resolutions = row[2].split(":") if row[2] is not None else []
 
-        c = Collection(
+        c = CatalogEntry(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
@@ -75,7 +75,7 @@ def capabilities_collections_get(db: PostgresDB):
     return cl
 
 
-def dggs_access_collections_collection_id_describe_get(db, collection_id):
+def catalog_describe_id_get(db, collection_id):
     rs = db.conn.execute(
         "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = '{}'".format(
             collection_id
@@ -85,7 +85,7 @@ def dggs_access_collections_collection_id_describe_get(db, collection_id):
         links = [row[5]] if row[5] is not None else []
         resolutions = row[2].split(":") if row[2] is not None else []
 
-        c = Collection(
+        c = CatalogEntry(
             id=row[0],
             dggs_id=row[1],
             title=row[0],
