@@ -87,7 +87,7 @@ def collections_get(f=None):  # noqa: E501
     links = [
         Link(
             {
-                "href": canonical_url_for_path(path="/collections.json"),
+                "href": canonical_url_for_path(path="/collections?f=json"),
                 "rel": "self",
                 "title": "this document",
                 "type": "application/json",
@@ -95,7 +95,7 @@ def collections_get(f=None):  # noqa: E501
         ),
         Link(
             {
-                "href": canonical_url_for_path(path="/collections.html"),
+                "href": canonical_url_for_path(path="/collections?f=html"),
                 "rel": "alternate",
                 "title": "this document as HTML",
                 "type": "text/html",

@@ -13,6 +13,15 @@ except ImportError:
     print("RHEALPIX library not available")
 
 
+def get_dggs_base_info(dggs_type, catalog_dict):
+    if dggs_type == "H3":
+        return h3_transform.get_dggs_base_info(catalog_dict)
+    elif dggs_type == "RHEALPIX":
+        return rhpix_transform.get_dggs_base_info(catalog_dict)
+    else:
+        return DggsTypeNotSupportedError()
+
+
 def get_parent(dggs_type, cell_id):
     if dggs_type == "H3":
         return h3_transform.get_parent(cell_id)

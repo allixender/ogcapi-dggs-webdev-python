@@ -1,11 +1,5 @@
 from dggs_api_server import config_fields as f
 
-from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.catalog_entry import CatalogEntry  # noqa: E501
-from dggs_api_server.models.link import Link  # noqa: F401,E501
-
-from flask import current_app, logging
-
 from clickhouse_driver import Client as ChClient
 
 
@@ -39,61 +33,57 @@ def catalog_get(db: ClickhouseDB):
     `date_updated` DateTime
     """
     rs = db.ch_client.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog",
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url, extent, date_loaded FROM dggs_catalog",
         with_column_types=False,
         columnar=False,
     )
     c_list = []
+    field_names = [description[0] for description in rs.description]
     for row in rs:
-        c = CatalogEntry(
-            id=row[0],
-            dggs_id=row[1],
-            title=row[0],
-            description=row[4],
-            resolutions=row[2],
-            links=list(row[5]),
-        )
+        tx = zip(field_names, row)
+        c = dict(tx)
+
+        links = [c["meta_url"]] if c["meta_url"] is not None else []
+        resolutions = [
+            int(x) for x in c["resolutions"].split(":") if c["resolutions"] is not None
+        ]
+        variables = c["variables"].split(":") if c["variables"] is not None else []
+        extent = [float(x) for x in c["extent"].split(",") if c["extent"] is not None]
+
+        c.update({"variables": variables})
+        c.update({"extent": extent})
+        c.update({"resolutions": resolutions})
+        c.update({"links": links})
+
         c_list.append(c)
 
-    links = [
-        Link(
-            {
-                "href": "http://data.example.org/dggs.json",
-                "rel": "self",
-                "title": "this document",
-                "type": "application/json",
-            }
-        ),
-        Link(
-            {
-                "href": "http://data.example.org/dggs.html",
-                "rel": "alternate",
-                "title": "this document as HTML",
-                "type": "text/html",
-            }
-        ),
-    ]
-
-    cl = CollectionList(links=links, dggs_list=c_list)
-    return cl
+    return c_list
 
 
 def catalog_describe_id_get(db, collection_id):
     rs = db.ch_client.execute(
-        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url FROM dggs_catalog where table_name = {}".format(
+        "SELECT table_name, dggs_type, resolutions, variables, description, meta_url, extent, date_loaded FROM dggs_catalog where table_name = {}".format(
             collection_id
         ),
         with_column_types=False,
         columnar=False,
     )
+    field_names = [description[0] for description in rs.description]
     for row in rs:
-        c = CatalogEntry(
-            id=row[0],
-            dggs_id=row[1],
-            title=row[0],
-            description=row[4],
-            resolutions=row[2],
-            links=list(row[5]),
-        )
+        tx = zip(field_names, row)
+        c = dict(tx)
+
+        links = [c["meta_url"]] if c["meta_url"] is not None else []
+        resolutions = [
+            int(x) for x in c["resolutions"].split(":") if c["resolutions"] is not None
+        ]
+        variables = c["variables"].split(":") if c["variables"] is not None else []
+        extent = [float(x) for x in c["extent"].split(",") if c["extent"] is not None]
+
+        c.update({"variables": variables})
+        c.update({"extent": extent})
+        c.update({"resolutions": resolutions})
+        c.update({"links": links})
+
         return c
     return None

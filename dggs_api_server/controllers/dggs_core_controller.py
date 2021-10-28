@@ -16,6 +16,7 @@ from dggs_api_server.models.http_response500 import HttpResponse500  # noqa: E50
 
 from dggs_api_server.models.dggs_list import DggsList  # noqa: E501
 from dggs_api_server.models.dggs_rs_parameters import DggsRsParameters  # noqa: E501
+from dggs_api_server.models.link import Link
 from dggs_api_server.models.zone_collection_geo_json import (
     ZoneCollectionGeoJSON,
 )  # noqa: E501
@@ -30,7 +31,8 @@ from dggs_api_server.models.exception import (
 )  # noqa: E501
 
 # from dggs_api_server.dataaccess.clickhouse_dao import db, dggs_access_collections_collection_id_describe_get
-from dggs_api_server.dataaccess import dao
+from dggs_api_server.dataaccess import dao, dggs_transform
+
 from dggs_api_server.controllers import canonical_url_for_path
 from flask import redirect, request
 
@@ -79,13 +81,16 @@ def dggs_dggs_rsid_zones_get(
     """
     resolution = range_refine[0] if range_refine is not None else None
 
-    rs = dao.dggs_access_collections_collection_id_zones_get(
-        dggs_rsid, resolution, bbox=bbox, zone_id_list=None, limit=limit
-    )
-    if not rs is None:
-        return rs
-    else:
-        return DggsCollectionIdNotFoundError()
+    if len(dggs_rsid.split(":")) == 2:
+        dggs_type, table_name = dggs_rsid.split(":")
+
+        rs = dao.dggs_access_collections_collection_id_zones_get(
+            table_name, resolution, bbox=bbox, zone_id_list=None, limit=limit
+        )
+        if not rs is None:
+            return rs
+
+    return DggsCollectionIdNotFoundError()
 
 
 def dggs_dggs_rsidget(dggs_rsid, f=None, geometry_stats=None):  # noqa: E501
@@ -102,7 +107,21 @@ def dggs_dggs_rsidget(dggs_rsid, f=None, geometry_stats=None):  # noqa: E501
 
     :rtype: DggsRsParameters
     """
-    return "do some magic!"
+    c_list = dao.catalog_get()
+    dggs_def = None
+
+    if len(dggs_rsid.split(":")) == 2:
+        dggs_type, table_name = dggs_rsid.split(":")
+
+        for cat_e in c_list:
+            if dggs_type in cat_e["dggs_type"] and table_name in cat_e["table_name"]:
+                dggs_def = dggs_transform.get_dggs_base_info(dggs_type, cat_e)
+                break
+
+    if dggs_def is None:
+        return HttpResponse404(code="404", description="dggs_rsid not found.")
+    else:
+        return dggs_def
 
 
 def dggs_get(f=None):  # noqa: E501
@@ -115,4 +134,23 @@ def dggs_get(f=None):  # noqa: E501
 
     :rtype: DggsList
     """
-    return "do some magic!"
+    c_list = dao.catalog_get()
+
+    links = []
+    self_href = canonical_url_for_path(path="/dggs?f=json")
+    l = Link(
+        href=self_href,
+        rel="self",
+        title="The JSON representation of the landing page for the DGGS resources",
+        type="application/json",
+    )
+    links.append(l)
+
+    for cat_e in c_list:
+        rel = cat_e["dggs_type"] + ":" + cat_e["table_name"]
+        href = canonical_url_for_path(path=f"/dggs/{rel}?f=json")
+        title = f"{cat_e['table_name']} in {rel} - {cat_e['description']}"
+        l = Link(href=href, rel=rel, title=title, type="application/json")
+        links.append(l)
+
+    return DggsList(links=links)

@@ -1,8 +1,5 @@
 from dggs_api_server import config_fields as f
 
-from dggs_api_server.models.collection_list import CollectionList
-from dggs_api_server.models.link import Link  # noqa: F401,E501
-
 from dggs_api_server.models.exception import (
     DggsException,
     DggsCollectionIdNotFoundError,
@@ -14,10 +11,9 @@ from dggs_api_server.models.zone_geo_json import ZoneGeoJSON  # noqa: E501
 from dggs_api_server.models.dggsjson import DGGSJSON  # noqa: E501
 
 from dggs_api_server.dataaccess import dggs_transform
+from flask import current_app
 
 import sqlite3
-
-from flask import current_app, logging
 
 
 class SqliteDB:
@@ -66,7 +62,6 @@ def catalog_get(db: SqliteDB):
         c.update({"resolutions": resolutions})
         c.update({"links": links})
 
-        print(str(c))
         c_list.append(c)
 
     return c_list
@@ -95,7 +90,6 @@ def catalog_describe_id_get(db, collection_id):
         c.update({"resolutions": resolutions})
         c.update({"links": links})
 
-        print(str(c))
         return c
     return None
 
@@ -150,11 +144,11 @@ def dggs_access_collections_collection_id_zones_get(
     params = f"c {collection_id}, r {resolution}, b {bbox}, z {zone_id_list}, l {limit}"
     current_app.logger.info(params)
 
-    dggs_info = dggs_access_collections_collection_id_describe_get(db, collection_id)
+    dggs_info = catalog_describe_id_get(db, collection_id)
     if dggs_info is None:
         return None
 
-    dggs_type = dggs_info.dggs_id
+    dggs_type = dggs_info["dggs_type"]
 
     zone_selection_list = []
     has_parents = False
