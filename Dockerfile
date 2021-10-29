@@ -12,7 +12,7 @@ RUN pip3 install --no-cache-dir -r requirements-rhealpix.txt
 
 COPY . /usr/src/app
 
-RUN ln -s /usr/src/app/dggs_api_server/swagger/swagger-0.0.6.yaml /usr/src/app/dggs_api_server/swagger/swagger.yaml
+RUN ln -s /usr/src/app/dggs_api_server/swagger/swagger-0.0.6a.yaml /usr/src/app/dggs_api_server/swagger/swagger.yaml
 
 ENV TABLES_CONFIG /usr/src/app/tables.template.conf
 

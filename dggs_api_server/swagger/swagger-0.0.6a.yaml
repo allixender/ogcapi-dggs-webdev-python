@@ -11528,7 +11528,7 @@ components:
         items:
           type: string
     query-another:
-      name: ZonalID
+      name: other
       in: query
       description: "type ZonalIdentifier, mandatory. Specifies the target region for\
         \ the query. In zonal query a zone’s identifier provides sufficient description\
@@ -11536,7 +11536,7 @@ components:
         \ data used in Query2D and Query3D for both the source and the target."
       required: true
       style: form
-      explode: true
+      explode: false
       schema:
         type: string
         example: R4
