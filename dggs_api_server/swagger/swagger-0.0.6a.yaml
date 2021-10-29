@@ -1209,11 +1209,10 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
-        explode: true
+        style: simple
+        explode: false
         schema:
           type: string
-          example: R4
       - name: projectTo
         in: query
         description: "projectTo specifies an optional reference direction, surface\
@@ -1358,7 +1357,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -1728,8 +1727,8 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
-        explode: true
+        style: simple
+        explode: false
         schema:
           type: string
           example: R4
@@ -1962,7 +1961,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -2196,7 +2195,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -2430,7 +2429,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -3593,7 +3592,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -3828,7 +3827,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -4063,7 +4062,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -4298,7 +4297,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5238,7 +5237,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5378,7 +5377,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5520,7 +5519,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5662,7 +5661,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5804,7 +5803,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -5946,7 +5945,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6088,7 +6087,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6230,7 +6229,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6372,7 +6371,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6514,7 +6513,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6663,7 +6662,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6817,7 +6816,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -6971,7 +6970,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7134,7 +7133,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7282,7 +7281,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7432,7 +7431,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7582,7 +7581,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7732,7 +7731,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -7882,7 +7881,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8032,7 +8031,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8182,7 +8181,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8332,7 +8331,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8482,7 +8481,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8639,7 +8638,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8801,7 +8800,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -8963,7 +8962,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -9117,7 +9116,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -9271,7 +9270,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -9428,7 +9427,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
@@ -9590,7 +9589,7 @@ paths:
           \ of the geometry data used in Query2D and Query3D for both the source and\
           \ the target."
         required: true
-        style: form
+        style: simple
         explode: true
         schema:
           type: string
