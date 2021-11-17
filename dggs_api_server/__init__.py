@@ -3,7 +3,7 @@ import os
 
 
 def get_base_url():
-    BASE_URL = "http://localhost:8080/"
+    BASE_URL = "http://localhost:8080/dggs-api"
     try:
         BASE_URL = os.environ.get("BASE_URL")
     except KeyError:
