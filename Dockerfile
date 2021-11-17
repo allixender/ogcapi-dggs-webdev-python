@@ -15,6 +15,7 @@ COPY . /usr/src/app
 RUN ln -s /usr/src/app/dggs_api_server/swagger/swagger-0.0.6a.yaml /usr/src/app/dggs_api_server/swagger/swagger.yaml
 
 ENV TABLES_CONFIG /usr/src/app/tables.template.conf
+ENV BASE_URL http://localhost:8080
 
 EXPOSE 8080
 
