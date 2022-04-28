@@ -39,7 +39,7 @@ def main():
 
     CORS(app.app)
     app.app.logger.info("I configured the flask logger!")
-    app.run(port=8080)
+    app.run(port=8081)
 
 
 if __name__ == "__main__":

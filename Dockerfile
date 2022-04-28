@@ -17,7 +17,7 @@ RUN ln -s /usr/src/app/dggs_api_server/swagger/swagger-0.0.6a.yaml /usr/src/app/
 ENV TABLES_CONFIG /usr/src/app/tables.template.conf
 ENV BASE_URL http://localhost:8080/dggs-api
 
-EXPOSE 8080
+EXPOSE 8081
 
 ENTRYPOINT ["python3"]
 
