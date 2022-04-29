@@ -138,6 +138,8 @@ def describe_collection(collection_id, f=None):  # noqa: E501
     :rtype: Collections
     """
     cat_e = dao.catalog_describe_id_get(collection_id)
+    if cat_e is None:
+        return HttpResponse404(code=404, description="collection not found")
 
     links = [
         Link(href=h, rel="alternate", type="text/html", title=cat_e["description"])

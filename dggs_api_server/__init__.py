@@ -46,12 +46,12 @@ def get_connection_details():
 
     elif driver == "psycopg2":
         database = conf.get("db.postgres.database")
-        schema = conf.get_bool("db.postgres.schema")
+        schema = conf.get_string("db.postgres.schema")
         host = conf.get_string("db.postgres.host")
         port = conf["db.postgres.port"]
         user = conf["db.postgres"]["user"]
         password = conf.get_config("db.postgres")["password"]
-        ssl = conf.get_bool("db.postgres.ssl")
+        ssl = conf.get_string("db.postgres.ssl")
 
         return {
             "driver": driver,
